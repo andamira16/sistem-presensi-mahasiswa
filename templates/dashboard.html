@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Presensi Mahasiswa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+        }
+        .navbar {
+            background: linear-gradient(45deg, #0056b3,  #2da7ee);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+        .navbar-brand span {
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .container {
+            margin-top: 0px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            
+        }
+        h2 {
+            color: #333;
+        }
+        h5 {
+            font-weight: 600;
+        }
+        h6 {
+            font-size: medium;
+            justify-items: center;
+        }
+        .btn {
+            border-radius: 30px;
+        }
+        video {
+            width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #9e9e9e;
+        }
+        @media (max-width: 768px) {
+            .navbar-brand span {
+                font-size: 1rem;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            h5 {
+                font-size: 1rem;
+                font-weight: 600;
+            }
+        }
+        @media (max-width: 576px) {
+            .card-body {
+                padding: 10px;
+            }
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Bootstrap 5 Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(45deg, #0052cc, #007bff); padding: 10px 0;">
+    <div class="container">
+        <!-- Logo dan Judul -->
+        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('dashboard') }}">
+            <img src="static/images/logo.png" alt="Logo Sistem" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+            <span class="text-white fw-bold">Sistem Presensi Mahasiswa</span>
+        </a>
+
+        <!-- Toggler Button untuk Mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Menu -->
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a href="{{ url_for('caripresensi') }}" class="btn btn-primary text-white mx-2" 
+                        style="background: linear-gradient(45deg, #008e3b, #00674a); border: none; padding: 8px 20px; border-radius: 20px;">
+                        Cari Presensi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('halamandosen') }}" class="btn btn-primary text-white mx-2" 
+                        style="background: linear-gradient(45deg, #8e007f, #b300e4); border: none; padding: 8px 20px; border-radius: 20px;">
+                        Halaman Dosen
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+
+<div class="container">
+    <!-- Video Streaming Langsung -->
+    <div class="card mt-4">
+        <div class="card-body text-center">
+            <h5>See your self here!</h5>
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+        </div>
+    </div>
+    <!-- Pengaturan Jadwal Presensi -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5>Pengaturan Jadwal Presensi</h5>
+            <form id="schedule-form">
+                <div class="mb-3">
+                    <label for="matakuliah" class="form-label">Pilih Mata Kuliah</label>
+                    <select id="matakuliah" class="form-select" required>
+                        <option value="" selected disabled></option>
+                        <option value="IMK">Interaksi Manusia dan Komputer</option>
+                        <option value="DL">Deep Learning</option>
+                        <option value="MP">Metodologi Penelitian</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="kelas" class="form-label">Pilih Kelas</label>
+                    <select id="kelas" class="form-select" required>
+                        <option value="" selected disabled></option>
+                        <option value="A">Kelas A</option>
+                        <option value="B">Kelas B</option>
+                        <option value="C">Kelas C</option>
+                        <option value="D">Kelas D</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Presensi -->
+    <div class="card mt-4">
+        <div class="card-body text-center">
+            <h5>Presensi</h5>
+            <h6>Silakan tunggu proses presensi hingga selesai!</h6>
+            <a href="#" id="start-detection" class="btn btn-success mt-2">Mulai Presensi</a>
+        </div>
+    </div>
+
+</div>
+<script>
+    $(document).ready(function () {
+    let video = document.getElementById("video");
+    let canvas = document.getElementById("canvas");
+    let ctx = canvas.getContext("2d");
+    let streaming = false;
+    let detectionStarted = false;
+    let detectionTimeout; // 🔥 Timeout untuk batas waktu presensi
+
+    function startCamera(callback) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            .then((stream) => {
+                video.srcObject = stream;
+                streaming = true;
+                console.log("DEBUG: Kamera aktif, streaming =", streaming);
+                
+                video.onloadedmetadata = function () {
+                    if (callback) callback();
+                };
+            })
+            .catch((error) => {
+                console.error("DEBUG: Gagal mengakses kamera!", error);
+                alert("Pastikan memberi izin akses kamera!");
+            });
+    }
+
+    function stopCamera() {
+        let stream = video.srcObject;
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            video.srcObject = null;
+            streaming = false;
+            console.log("DEBUG: Kamera dimatikan.");
+        }
+    }
+
+    function startDetection() {
+        $.ajax({
+            url: "/start_detection",
+            type: "POST",
+            success: function (response) {
+                console.log("DEBUG: Deteksi dimulai!", response);
+                detectionStarted = true;
+
+                // 🔥 Set batas waktu maksimal 30 detik untuk presensi
+                detectionTimeout = setTimeout(() => {
+                    console.warn("DEBUG: Waktu habis, menghentikan kamera...");
+                    alert("Anda mungkin sudah melakukan presensi untuk kelas ini sebelumnya. Coba untuk mencarinya. Jika tetap tidak ada, mungkin wajah Anda belum terdaftar pada sistem!");
+                    stopCamera(); // 🔥 Matikan kamera setelah timeout
+                }, 30000); // 30 detik
+
+                setTimeout(() => captureFrame(), 1000);
+            },
+            error: function (xhr) {
+                console.error("DEBUG: Gagal memulai deteksi!", xhr.responseText);
+            }
+        });
+    }
+
+    function captureFrame() {
+        if (!streaming || !detectionStarted) {
+            console.log("DEBUG: Deteksi belum aktif, tidak bisa capture frame!");
+            return;
+        }
+
+        console.log("DEBUG: captureFrame() berjalan!");
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        let imageData = canvas.toDataURL("image/jpeg");
+
+        console.log("DEBUG: Mengirim frame ke backend:", imageData.substring(0, 100));
+
+        $.ajax({
+            url: "/process_frame",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ image: imageData }),
+            success: function (response) {
+                console.log("DEBUG: Frame terkirim, respon dari backend:", response);
+
+                if (response.success && response.detected) {
+                    console.log("DEBUG: Wajah terdeteksi! Mematikan kamera...");
+                    
+                    clearTimeout(detectionTimeout); // 🔥 Hentikan timer jika deteksi sukses
+                    stopCamera();
+                    window.location.href = "/attendance_data"; // Alihkan ke halaman kehadiran
+                } else {
+                    console.log("DEBUG: Tidak ada wajah yang terdeteksi, lanjutkan capture.");
+                    setTimeout(captureFrame, 1000);
+                }
+            },
+            error: function (xhr) {
+                console.error("DEBUG: Gagal mengirim frame.", xhr.responseText);
+            }
+        });
+    }
+
+    $("#start-detection").on("click", function (e) {
+        e.preventDefault();
+
+        const kelas = $("#kelas").val();
+        const matakuliah = $("#matakuliah").val();
+
+        if (!kelas || !matakuliah) {
+            alert("Silakan pilih kelas dan mata kuliah terlebih dahulu!");
+            return;
+        }
+
+        console.log(`DEBUG: Mengirim request set_model dengan kelas=${kelas}, matakuliah=${matakuliah}`);
+
+        $.ajax({
+            url: "/set_model",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ kelas: kelas, matakuliah: matakuliah }),
+            success: function (response) {
+                console.log("Model berhasil disetel!", response);
+                
+                startCamera(() => {
+                    startDetection();
+                });
+            },
+            error: function (xhr) {
+                console.error("Gagal menyetel model!", xhr.responseText);
+                alert("Gagal menyetel model. Pastikan kelas dan mata kuliah sudah benar.");
+            }
+        });
+    });
+});
+</script>
+
+</body>
+
+<!-- Footer -->
+<footer class="text-center mt-4 py-3 bg-light">
+    <p class="mb-0">&copy; 2025 Sistem Presensi. All Rights Reserved.</p>
+</footer>
+</html>

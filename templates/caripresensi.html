@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Presensi Mahasiswa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+        }
+        .navbar {
+            background: linear-gradient(45deg, #0056b3,  #2da7ee);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+        .navbar-brand span {
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .container {
+            margin-top: 0px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            
+        }
+        h2 {
+            color: #333;
+        }
+        h5 {
+            font-weight: 600;
+        }
+        h6 {
+            font-size: medium;
+            justify-items: center;
+        }
+        .btn {
+            border-radius: 30px;
+        }
+        video {
+            width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #9e9e9e;
+        }
+        @media (max-width: 768px) {
+            .navbar-brand span {
+                font-size: 1rem;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            h5 {
+                font-size: 1rem;
+                font-weight: 600;
+            }
+        }
+        @media (max-width: 576px) {
+            .card-body {
+                padding: 10px;
+            }
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Bootstrap 5 Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(45deg, #0052cc, #007bff); padding: 10px 0;">
+    <div class="container">
+        <!-- Logo dan Judul -->
+        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('dashboard') }}">
+            <img src="static/images/logo.png" alt="Logo Sistem" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+            <span class="text-white fw-bold">Sistem Presensi Mahasiswa</span>
+        </a>
+
+        <!-- Toggler Button untuk Mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Menu -->
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a href="{{ url_for('caripresensi') }}" class="btn btn-primary text-white mx-2" 
+                        style="background: linear-gradient(45deg, #008e3b, #00674a); border: none; padding: 8px 20px; border-radius: 20px;">
+                        Cari Presensi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('halamandosen') }}" class="btn btn-primary text-white mx-2" 
+                        style="background: linear-gradient(45deg, #8e007f, #b300e4); border: none; padding: 8px 20px; border-radius: 20px;">
+                        Halaman Dosen
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2 class="text-center">Data Presensi</h2>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <div class="card p-4">
+        <form action="{{ url_for('submit_attendance_data') }}" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label" style="font-weight: 600;">Mata Kuliah</label>
+                <select class="form-select" name="submit_matakuliah">
+                    <option value="">Semua</option>
+                    <option value="IMK" {% if request.args.get('submit_matakuliah') == 'IMK' %}selected{% endif %}>Interaksi Manusia & Komputer</option>
+                    <option value="DL" {% if request.args.get('submit_matakuliah') == 'DL' %}selected{% endif %}>Deep Learning</option>
+                    <option value="MP" {% if request.args.get('submit_matakuliah') == 'MP' %}selected{% endif %}>Metodologi Penelitian</option>
+                </select>
+                
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" style="font-weight: 600;">Kelas</label>
+                <select class="form-select" name="submit_kelas">
+                    <option value="">Semua</option>
+                    <option value="A" {% if request.args.get('submit_kelas') == 'A' %}selected{% endif %}>Kelas A</option>
+                    <option value="B" {% if request.args.get('submit_kelas') == 'B' %}selected{% endif %}>Kelas B</option>
+                    <option value="C" {% if request.args.get('submit_kelas') == 'C' %}selected{% endif %}>Kelas C</option>
+                    <option value="D" {% if request.args.get('submit_kelas') == 'D' %}selected{% endif %}>Kelas D</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" style="font-weight: 600;">Tanggal</label>
+                <input type="date" class="form-control" name="submit_tanggal" value="{{ request.args.get('submit_tanggal', '') }}">
+
+            </div>
+            <div class="col-12 text-center">
+                <button type="submit" class="btn btn-primary btn-custom">Cari Data</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="card p-4 shadow-lg">
+        <h5 class="text-left mb-3 fw-bold">Total Mahasiswa Hadir: <span id="jumlahHadir">{{ data|length }}</span> orang</h5>
+        
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th class="text-center"><input type="checkbox" id="selectAll"></th>
+                        <th class="text-center">No</th>
+                        <th class="text-center">Nama</th>
+                        <th class="text-center">Waktu</th>
+                        <th class="text-center">Foto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if data %}
+                        {% for row in data %}
+                            <tr>
+                                <td class="text-center"><input type="checkbox" class="rowCheckbox" data-id="{{ row[0] }}"></td>
+                                <td class="text-center fw-bold">{{ loop.index }}</td>
+                                <td class="text-center">{{ row[1] }}</td>
+                                <td class="text-center">{{ row[2] }}</td>
+                                <td class="text-center">
+                                    <img src="{{ row[3] }}" alt="Foto Deteksi" class="rounded shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Tidak ada data.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+    
+    <script>
+        // Fungsi untuk mengirimkan filter ke server
+    function filterByDateAndSubject() {
+        const selectedDate = document.getElementById('submit_tanggal').value; // Ambil nilai tanggal
+        const selectedMatkul = document.getElementById('submit_matakuliah').value;   // Ambil nilai mata kuliah
+        const selectedKelas = document.getElementById('submit_kelas').value;         // Ambil nilai kelas
+        
+        // Alert 
+        if (!selectedDate) {
+            alert("Filter tanggal wajib diisi!");
+            return; // Hentikan eksekusi jika tanggal kosong
+        }
+
+        // Buat URL dengan parameter filter
+        let url = '/submit_attendance_data?';
+        let params = [];
+
+        params.push(`submit_tanggal=${selectedDate}`); // Tambahkan tanggal ke parameter
+        
+        // Tambahkan mata kuliah jika dipilih
+        if (selectedMatkul) {
+            params.push(`submit_matakuliah=${selectedMatkul}`);
+        }
+        
+        // Tambahkan kelas jika dipilih
+        if (selectedKelas) {
+            params.push(`submit_kelas=${selectedKelas}`);
+        }
+
+        // Gabungkan parameter ke dalam URL
+        url += params.join('&');
+        window.location.href = url; // Redirect ke URL dengan filter
+    }
+
+
+    document.getElementById('selectAll').addEventListener('change', function () {
+            document.querySelectorAll('.rowCheckbox').forEach(cb => cb.checked = this.checked);
+        });
+
+        document.getElementById('deleteForm').addEventListener('submit', function () {
+            const selectedRows = Array.from(document.querySelectorAll('.rowCheckbox:checked'))
+                .map(cb => cb.getAttribute('data-id'));
+            document.getElementById('selectedRows').value = selectedRows.join(',');
+        });
+    
+    </script>
+    
+    
+</body>
+<footer class="text-center mt-4 py-3 bg-light">
+    <p class="mb-0">&copy; 2025 Sistem Presensi. All Rights Reserved.</p>
+</footer>
+</html>

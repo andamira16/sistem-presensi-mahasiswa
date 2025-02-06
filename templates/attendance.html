@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Presensi Mahasiswa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+        }
+        .navbar {
+            background: linear-gradient(45deg, #0056b3,  #2da7ee);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+        .navbar-brand span {
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .container {
+            margin-top: 0px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            
+        }
+        h2 {
+            color: #333;
+        }
+        h5 {
+            font-weight: 600;
+        }
+        h6 {
+            font-size: medium;
+            justify-items: center;
+        }
+        .btn {
+            border-radius: 30px;
+        }
+        video {
+            width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #9e9e9e;
+        }
+        @media (max-width: 768px) {
+            .navbar-brand span {
+                font-size: 1rem;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            h5 {
+                font-size: 1rem;
+                font-weight: 600;
+            }
+        }
+        @media (max-width: 576px) {
+            .card-body {
+                padding: 10px;
+            }
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Bootstrap 5 Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(45deg, #0052cc, #007bff); padding: 10px 0;">
+    <div class="container">
+        <!-- Logo dan Judul -->
+        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('dashboard') }}">
+            <img src="static/images/logo.png" alt="Logo Sistem" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+            <span class="text-white fw-bold">Sistem Presensi Mahasiswa</span>
+        </a>
+
+        <!-- Toggler Button untuk Mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Menu -->
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a href="{{ url_for('caripresensi') }}" class="btn btn-primary text-white mx-2" 
+                        style="background: linear-gradient(45deg, #008e3b, #00674a); border: none; padding: 8px 20px; border-radius: 20px;">
+                        Cari Presensi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('halamandosen') }}" class="btn btn-primary text-white mx-2" 
+                        style="background: linear-gradient(45deg, #8e007f, #b300e4); border: none; padding: 8px 20px; border-radius: 20px;">
+                        Halaman Dosen
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <h2 class="text-center" style="margin-top: 20px;">Hasil Deteksi Terbaru</h2>
+    <div class="row justify-content-center">
+        {% if data %}
+            <div class="col-md-6">
+                <div class="card mt-4 p-3">
+                    <div class="text-center">
+                        <img src="{{ data[4] }}" alt="Foto Deteksi" class="img-fluid rounded" style="width: 200px; height: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered mt-3">
+                            <tr>
+                                <th>Nama</th>
+                                <td>{{ data[0] }}</td>
+                            </tr>
+                            <tr>
+                                <th>Mata Kuliah</th>
+                                <td>{{ data[1] }}</td>
+                            </tr>
+                            <tr>
+                                <th>Kelas</th>
+                                <td>{{ data[2] }}</td>
+                            </tr>
+                            <tr>
+                                <th>Waktu</th>
+                                <td><i class="bi bi-clock"></i> {{ data[3] }}</td>
+                            </tr>
+                        </table>
+
+                        <p class="text-center text-muted mt-3">
+                            <strong>Bukan Anda?</strong> Silakan klik <a href="{{ url_for('dashboard') }}" class="text-danger"><strong>Ulangi</strong></a> <br>
+                            Jika benar, klik <strong>Submit</strong> untuk menyelesaikan presensi.
+                        </p>
+                        <div class="text-center mt-2">
+                            <form action="{{ url_for('delete_latest_attendance') }}" method="POST">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-arrow-repeat"></i> Ulangi
+                                </button>
+                            </form>
+                        </div>                        
+                        <form action="{{ url_for('submit_attendance') }}" method="POST" class="text-center">
+                            <input type="hidden" name="label" value="{{ data[0] }}">
+                            <input type="hidden" name="matakuliah" value="{{ data[1] }}">
+                            <input type="hidden" name="kelas" value="{{ data[2] }}">
+                            <input type="hidden" name="waktu" value="{{ data[3] }}">
+                            <input type="hidden" name="photo_path" value="{{ data[4] }}">
+                            <input type="hidden" name="tanggal" value="{{ data[5] }}">
+
+                            <button type="submit" class="btn btn-success mt-2">
+                                <i class="bi bi-check-circle"></i> Submit
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-center">Tidak ada data deteksi terbaru.</p>
+        {% endif %}
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+<footer class="text-center mt-4 py-3 bg-light">
+    <p class="mb-0">&copy; 2025 Sistem Presensi. All Rights Reserved.</p>
+</footer>
+</html>
